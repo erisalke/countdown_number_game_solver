@@ -63,7 +63,7 @@ namespace csharpfun
     private double[] createNewNumbers(int i, int j, IOperand operand)
     {
       Func<double, double, IOperand, double> thunk =
-        (a, b, op) => operand.resolve(a, b);
+        (value_i, value_j, operad) => operand.resolve(value_i, value_j);
 
       return createNewArray<double>(baseNumbers, i, j, operand, thunk);
     }
@@ -71,20 +71,20 @@ namespace csharpfun
     private Transformation[] createNewTransformations(int i, int j, IOperand operand)
     {
       Func<Transformation, Transformation, IOperand, Transformation> thunk =
-        (a, b, op) => new Transformation(a, b, op);
+        (value_i, value_j, operand_) => new Transformation(value_i, value_j, operand_);
 
       return createNewArray<Transformation>(baseTransformations, i, j, operand, thunk);
     }
 
     private T[] createNewArray<T>(
-      T[] arr, int i, int j, IOperand operand,
+      T[] array, int position_i, int position_j, IOperand operand,
       Func<T, T, IOperand, T> thunk
     ) {
-      var newElement = thunk(arr[i], arr[j], operand);
-      var newArr = arr.Where((_, index) => index != j).ToArray();
-      newArr[i] = newElement;
+      var newElement = thunk(array[position_i], array[position_j], operand);
+      var newArray = array.Where((_, index) => index != position_j).ToArray();
+      newArray[position_i] = newElement;
 
-      return newArr;
+      return newArray;
     }
     private List<string> scanThisSovler(int target)
     {

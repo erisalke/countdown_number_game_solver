@@ -7,7 +7,7 @@ namespace csharpfun
 {
   class Solver
   {
-    public Solver(double[] baseNumbers, Transformation[] baseTransformations){ //, int expectedSolution) {
+    public Solver(double[] baseNumbers, Transformation[] baseTransformations) {
       this.children = new Collection<Solver>();
       this.baseNumbers = baseNumbers;
       this.baseTransformations = baseTransformations;
@@ -23,54 +23,69 @@ namespace csharpfun
       playChildren();
     }
 
+    public List<string> getSolutions(int target) {
+      var results = new List<string>();
+      results.AddRange(scanThisSovler(target));
+
+      foreach(var childSolver in children) {
+        var list = childSolver.getSolutions(target);
+        results.AddRange(list);
+      }
+
+      return results;
+    }
+
+    private List<string> scanThisSovler(int target)
+    {
+      var results = new List<string>();
+
+      for (var i=0; i<baseNumbers.Length; i++) {
+        if (baseNumbers[i] == target) {
+          results.Add(baseTransformations[i].ToString());
+        }
+      }
+
+      return results;
+    }
+
     private void prepareChildren() {
       for (var i = 0; i < baseNumbers.Length; i++) {
         for (var j = i + 1; j < baseNumbers.Length; j++) {
           foreach(var operand in Operands.All) {
-            addNewSolverToChildren(i, j, operand);
+            var solver = createNewSolver(i, j, operand);
+            children.Add(solver);
           }
         }
       }
     }
     private void playChildren()
     {
-      foreach(var child in children) {
-        child.play();
+      foreach(var childSolver in children) {
+        childSolver.play();
       }
     }
 
-    private void addNewSolverToChildren(int i, int j, IOperand operand)
+    private Solver createNewSolver(int i, int j, IOperand operand)
     {
       var numbers = createNewNumbers(i, j, operand);
       var transformations = createNewTransformations(i, j, operand);
 
-      children.Add(new Solver(numbers.Item1, transformations));
-
-      checkIfDone(numbers.Item2, transformations[i]);
-    }
-
-    private void checkIfDone(double newNumber, Transformation transformation)
-    {       
-      if (newNumber == Program.expected) {
-        Console.Write($"DONE, found: {newNumber}");
-        Console.WriteLine($"= {transformation}");
-        // Console.Read();
-      }
+      return new Solver(numbers, transformations);
     }
 
     private Transformation[] createNewTransformations(int i, int j, IOperand operand)
     {
       var a = baseTransformations[i].ToString();
       var b = baseTransformations[j].ToString();
-
       var newTransformation = new Transformation(a, b, operand);
+
       var transformations = baseTransformations.Where((_, index) => index != j).ToArray();
       transformations[i] = newTransformation;
 
       return transformations;
     }
 
-    private Tuple<double[], double> createNewNumbers(int i, int j, IOperand operand)
+    private double[] createNewNumbers(int i, int j, IOperand operand)
     {
       var a = baseNumbers[i];
       var b = baseNumbers[j];
@@ -79,7 +94,7 @@ namespace csharpfun
       var numbers = baseNumbers.Where((_, index) => index != j).ToArray();
       numbers[i] = newNumber;
 
-      return new Tuple<double[], double>(numbers, newNumber);
+      return numbers;
     }
   }
 }

@@ -14,24 +14,27 @@ namespace csharpfun
             // ------------------------------
 
             var data = prepareData(arr);
+
+            double[] A = data.Item1;
+            Transformation[] trans = data.Item2;
             
-            var solver = new Solver(data.Item1, data.Item2);
+            var solver = new Solver(A, trans);
+
             solver.play();
             var solutions = solver.getSolutions(target);
 
-            print<string>(solutions, target);
-
-            Console.Write("Terminated");
-            Console.Read();
+            printResult(solutions, target);
         }
 
-    private static void print<T>(ICollection<T> collection, int target) {
+    private static void printResult(List<string> collection, int target) {
         var solutions = collection.Select(x => x).Distinct();
         foreach (var solution in solutions) {
             Console.WriteLine($"{target} = {solution.ToString()}");
         }
         Console.WriteLine();
         Console.WriteLine($"Number of uniq solutions: {solutions.Count()}");
+        Console.Write("Terminated");
+        Console.Read();
     }
 
     private static Tuple<double[], Transformation[]> prepareData(int[] arr) {

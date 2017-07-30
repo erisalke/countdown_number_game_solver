@@ -75,8 +75,8 @@ namespace csharpfun
 
     private Transformation[] createNewTransformations(int i, int j, IOperand operand)
     {
-      var a = baseTransformations[i].ToString();
-      var b = baseTransformations[j].ToString();
+      var a = baseTransformations[i];
+      var b = baseTransformations[j];
       var newTransformation = new Transformation(a, b, operand);
 
       var transformations = baseTransformations.Where((_, index) => index != j).ToArray();

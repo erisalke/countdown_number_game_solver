@@ -3,16 +3,24 @@ namespace csharpfun
   internal class Transformation
   {
     public Transformation(double value) {
-      this.value = value.ToString();
+      this.singleValue = value.ToString();
     }
 
-    public Transformation(string valueA, string valueB, IOperand operand) {
-      this.value = $"({valueA} {operand.ToString()} {valueB})";
+    public Transformation(Transformation transA, Transformation transB, IOperand operand) {
+      this.singleValue = null;
+      this.transA = transA;
+      this.transB = transB;
+      this.operand = operand;
     }
-    private string value;
+    private string singleValue;
+    private Transformation transA;
+    private Transformation transB;
+    private IOperand operand;
 
     public override string ToString() {
-      return value;
+      return (singleValue != null)
+        ? singleValue
+        : $"({transA.ToString()} {operand.ToString()} {transB.ToString()})";
     }
   }
 }

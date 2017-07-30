@@ -35,19 +35,6 @@ namespace csharpfun
       return results;
     }
 
-    private List<string> scanThisSovler(int target)
-    {
-      var results = new List<string>();
-
-      for (var i=0; i<baseNumbers.Length; i++) {
-        if (baseNumbers[i] == target) {
-          results.Add(baseTransformations[i].ToString());
-        }
-      }
-
-      return results;
-    }
-
     private void prepareChildren() {
       for (var i = 0; i < baseNumbers.Length; i++) {
         for (var j = i + 1; j < baseNumbers.Length; j++) {
@@ -67,34 +54,49 @@ namespace csharpfun
 
     private Solver createNewSolver(int i, int j, IOperand operand)
     {
-      var numbers = createNewNumbers(i, j, operand);
-      var transformations = createNewTransformations(i, j, operand);
+      var numbers = createNewNumbers(i, j, operand);     
+      var transformations = createNewTransformations(i,j,operand);
 
       return new Solver(numbers, transformations);
     }
 
-    private Transformation[] createNewTransformations(int i, int j, IOperand operand)
-    {
-      var a = baseTransformations[i];
-      var b = baseTransformations[j];
-      var newTransformation = new Transformation(a, b, operand);
-
-      var transformations = baseTransformations.Where((_, index) => index != j).ToArray();
-      transformations[i] = newTransformation;
-
-      return transformations;
-    }
-
     private double[] createNewNumbers(int i, int j, IOperand operand)
     {
-      var a = baseNumbers[i];
-      var b = baseNumbers[j];
-      var newNumber = operand.resolve(a, b);
+      Func<double, double, IOperand, double> thunk =
+        (a, b, op) => operand.resolve(a, b);
 
-      var numbers = baseNumbers.Where((_, index) => index != j).ToArray();
-      numbers[i] = newNumber;
+      return createNewArray<double>(baseNumbers, i, j, operand, thunk);
+    }
 
-      return numbers;
+    private Transformation[] createNewTransformations(int i, int j, IOperand operand)
+    {
+      Func<Transformation, Transformation, IOperand, Transformation> thunk =
+        (a, b, op) => new Transformation(a, b, op);
+
+      return createNewArray<Transformation>(baseTransformations, i, j, operand, thunk);
+    }
+
+    private T[] createNewArray<T>(
+      T[] arr, int i, int j, IOperand operand,
+      Func<T, T, IOperand, T> thunk
+    ) {
+      var newElement = thunk(arr[i], arr[j], operand);
+      var newArr = arr.Where((_, index) => index != j).ToArray();
+      newArr[i] = newElement;
+
+      return newArr;
+    }
+    private List<string> scanThisSovler(int target)
+    {
+      var results = new List<string>();
+
+      for (var i=0; i<baseNumbers.Length; i++) {
+        if (baseNumbers[i] == target) {
+          results.Add(baseTransformations[i].ToString());
+        }
+      }
+
+      return results;
     }
   }
 }
